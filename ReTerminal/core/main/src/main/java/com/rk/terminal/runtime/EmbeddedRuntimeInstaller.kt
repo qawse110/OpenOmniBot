@@ -30,7 +30,7 @@ object EmbeddedRuntimeInstaller {
         ),
         RuntimeAssetSpec(
             outputName = "libtalloc.so.2",
-            assetCandidates = listOf("libtalloc.so.2")
+            assetCandidates = listOf("libtalloc_arm.so", "libtalloc.so.2")
         ),
         RuntimeAssetSpec(
             outputName = "alpine.tar.gz",
