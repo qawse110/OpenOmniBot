@@ -1,0 +1,29 @@
+name: Cleanup Old Artifacts
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete old artifacts (keep latest per name)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          ARTIFACTS=$(gh api "repos/$REPO/actions/artifacts?per_page=100" --jq '.artifacts | sort_by(.created_at) | reverse | group_by(.name) | map(.[:-1]) | flatten | .[].id')
+          if [ -z "$ARTIFACTS" ]; then
+            echo "No old artifacts to delete"
+          else
+            COUNT=0
+            for ID in $ARTIFACTS; do
+              gh api -X DELETE "repos/$REPO/actions/artifacts/$ID"
+              COUNT=$((COUNT + 1))
+            done
+            echo "Deleted $COUNT old artifacts"
+          fi
